@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Earthland Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --parchment: #f5eed8;
+      --parchment-dark: #e8dfc0;
+      --ink: #1c1a14;
+      --ink-light: #3d3828;
+      --forest: #2d4a2d;
+      --forest-mid: #3d6b3d;
+      --forest-light: #5a8f5a;
+      --gold: #b8902a;
+      --gold-light: #d4aa40;
+      --rust: #8b3a1c;
+      --cream: #faf6ec;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      background: var(--parchment);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.6;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 1.2rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(245, 238, 216, 0.88);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(184, 144, 42, 0.25);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--forest);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--forest); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 7rem 3rem 4rem;
+      gap: 4rem;
+      position: relative;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 48%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--forest) 0%, #1a2e1a 100%);
+      z-index: 0;
+    }
+
+    .hero-text {
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 1s ease both;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.2rem, 6vw, 5.5rem);
+      line-height: 1.05;
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--forest);
+    }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      line-height: 1.7;
+      color: var(--ink-light);
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      background: var(--forest);
+      color: var(--parchment);
+      border: none;
+      padding: 1rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      background: var(--forest-mid);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink-light);
+      padding: 1rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover { border-color: var(--forest); color: var(--forest); }
+
+    /* Hero card stack */
+    .hero-cards {
+      position: relative;
+      z-index: 1;
+      height: 500px;
+      animation: fadeUp 1.2s ease 0.2s both;
+    }
+
+    .project-card {
+      position: absolute;
+      background: var(--cream);
+      border: 1px solid var(--parchment-dark);
+      padding: 1.5rem;
+      width: 240px;
+      box-shadow: 4px 4px 20px rgba(28, 26, 20, 0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .project-card:hover { transform: translateY(-4px) rotate(0deg) !important; }
+
+    .project-card:nth-child(1) { top: 40px; left: 20px; transform: rotate(-3deg); }
+    .project-card:nth-child(2) { top: 80px; left: 140px; transform: rotate(1.5deg); }
+    .project-card:nth-child(3) { top: 220px; left: 30px; transform: rotate(2deg); }
+    .project-card:nth-child(4) { top: 270px; left: 155px; transform: rotate(-1deg); }
+
+    .card-tag {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .card-author {
+      font-size: 0.82rem;
+      color: var(--ink-light);
+      font-style: italic;
+    }
+
+    .card-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--forest-light);
+      margin-top: 0.8rem;
+      display: inline-block;
+    }
+
+    /* ─── MANIFESTO BAND ─── */
+    .manifesto {
+      background: var(--forest);
+      color: var(--parchment);
+      padding: 4rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .manifesto::before {
+      content: '"';
+      position: absolute;
+      font-family: 'Playfair Display', serif;
+      font-size: 20rem;
+      color: rgba(255,255,255,0.03);
+      top: -3rem;
+      left: 1rem;
+      line-height: 1;
+    }
+
+    .manifesto-text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-style: italic;
+      line-height: 1.5;
+      max-width: 600px;
+      color: var(--parchment);
+    }
+
+    .manifesto-rule {
+      width: 1px;
+      height: 80px;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .manifesto-stat {
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .manifesto-stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--gold-light);
+      display: block;
+    }
+
+    .manifesto-stat-label {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(245,238,216,0.6);
+    }
+
+    /* ─── FEATURES ─── */
+    .features {
+      padding: 7rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .section-eyebrow {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--parchment-dark);
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border: 1px solid var(--parchment-dark);
+    }
+
+    .feature-item {
+      padding: 2.5rem;
+      border-right: 1px solid var(--parchment-dark);
+      border-bottom: 1px solid var(--parchment-dark);
+      transition: background 0.2s;
+    }
+
+    .feature-item:hover { background: var(--cream); }
+    .feature-item:nth-child(3n) { border-right: none; }
+    .feature-item:nth-child(n+4) { border-bottom: none; }
+
+    .feature-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      font-style: italic;
+    }
+
+    .feature-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.8rem;
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--ink-light);
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    .how {
+      background: var(--ink);
+      color: var(--parchment);
+      padding: 7rem 3rem;
+    }
+
+    .how-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .how .section-eyebrow { color: var(--gold-light); }
+    .how h2 { color: var(--parchment); }
+
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 4rem;
+      border-top: 1px solid rgba(245,238,216,0.1);
+    }
+
+    .how-step {
+      padding: 2.5rem 2rem 2rem 0;
+      border-right: 1px solid rgba(245,238,216,0.1);
+      position: relative;
+    }
+
+    .how-step:last-child { border-right: none; padding-right: 0; }
+    .how-step + .how-step { padding-left: 2rem; }
+
+    .step-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: rgba(184,144,42,0.2);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--parchment);
+      margin-bottom: 0.6rem;
+    }
+
+    .step-desc {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: rgba(245,238,216,0.6);
+    }
+
+    /* ─── PROJECTS SHOWCASE ─── */
+    .showcase {
+      padding: 7rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .showcase-card {
+      background: var(--cream);
+      border: 1px solid var(--parchment-dark);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .showcase-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(28, 26, 20, 0.12);
+    }
+
+    .showcase-card.featured {
+      grid-row: 1 / 3;
+      background: var(--forest);
+      color: var(--parchment);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 420px;
+      border-color: var(--forest);
+    }
+
+    .showcase-card.featured::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(28,42,28,0.95) 30%, transparent);
+    }
+
+    .showcase-card.featured > * { position: relative; z-index: 1; }
+
+    .sc-tag {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .featured .sc-tag { color: var(--gold-light); }
+
+    .sc-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .featured .sc-title { font-size: 1.8rem; color: var(--parchment); }
+
+    .sc-by {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--ink-light);
+    }
+
+    .featured .sc-by { color: rgba(245,238,216,0.65); }
+
+    .sc-desc {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--ink-light);
+      margin-top: 0.6rem;
+    }
+
+    .featured .sc-desc { color: rgba(245,238,216,0.75); }
+
+    /* ─── EARLY ACCESS ─── */
+    .early-access {
+      background: var(--parchment-dark);
+      border-top: 1px solid rgba(184,144,42,0.2);
+      border-bottom: 1px solid rgba(184,144,42,0.2);
+      padding: 6rem 3rem;
+      text-align: center;
+    }
+
+    .early-access h2 { margin-bottom: 1rem; }
+
+    .early-access p {
+      font-size: 1.1rem;
+      color: var(--ink-light);
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 0;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .email-input {
+      flex: 1;
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid var(--ink-light);
+      border-right: none;
+      background: var(--cream);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .email-input::placeholder { color: rgba(61,56,40,0.4); }
+    .email-input:focus { border-color: var(--forest); }
+
+    .email-form .btn-primary {
+      border: 1px solid var(--forest);
+      white-space: nowrap;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--ink);
+      color: rgba(245,238,216,0.5);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--parchment);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(245,238,216,0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--parchment); }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      font-style: italic;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero::after { display: none; }
+      .hero-cards { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .feature-item:nth-child(3n) { border-right: 1px solid var(--parchment-dark); }
+      .feature-item:nth-child(2n) { border-right: none; }
+      .how-steps { grid-template-columns: 1fr 1fr; }
+      .how-step { border-bottom: 1px solid rgba(245,238,216,0.1); padding-right: 0; padding-left: 0; border-right: none; }
+      .showcase-grid { grid-template-columns: 1fr; }
+      .showcase-card.featured { min-height: 280px; grid-row: auto; }
+      .manifesto { flex-direction: column; gap: 2rem; text-align: center; }
+      .manifesto-rule { width: 80px; height: 1px; }
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+    }
+
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-item { border-right: none !important; }
+      .how-steps { grid-template-columns: 1fr; }
+      .hero { padding: 6rem 1.5rem 3rem; }
+      .features, .showcase { padding: 4rem 1.5rem; }
+      .email-form { flex-direction: column; }
+      .email-input { border-right: 1px solid var(--ink-light); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Earthland Library</a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#access">Early Access</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <p class="hero-eyebrow">A platform for creators</p>
+      <h1>Where work<br/>is <em>made</em><br/>together.</h1>
+      <p class="hero-sub">
+        A social library for creators who want to build — not just broadcast.
+        Host your projects, find collaborators, and make something that lasts.
+      </p>
+      <div class="hero-actions">
+        <a href="#access" class="btn-primary">Join Early Access</a>
+        <a href="#features" class="btn-ghost">Explore the Library</a>
+      </div>
+    </div>
+
+    <div class="hero-cards">
+      <div class="project-card">
+        <p class="card-tag">Creative Nonfiction</p>
+        <p class="card-title">American Wolves</p>
+        <p class="card-author">Griffin Cool</p>
+        <span class="card-dot"></span>
+      </div>
+      <div class="project-card">
+        <p class="card-tag">Minecraft Event</p>
+        <p class="card-title">Gods & Glory</p>
+        <p class="card-author">Griffin Cool</p>
+        <span class="card-dot"></span>
+      </div>
+      <div class="project-card">
+        <p class="card-tag">Interactive Fiction</p>
+        <p class="card-title">Dreamworld</p>
+        <p class="card-author">Griffin Cool</p>
+        <span class="card-dot"></span>
+      </div>
+      <div class="project-card">
+        <p class="card-tag">Episodic Series</p>
+        <p class="card-title">Lumbridge Logs</p>
+        <p class="card-author">Griffin Cool</p>
+        <span class="card-dot"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANIFESTO BAND -->
+  <div class="manifesto">
+    <p class="manifesto-text">
+      "The internet has platforms for sharing your work. It doesn't have one for
+      making it. The Library is the room where the work happens."
+    </p>
+    <div class="manifesto-rule"></div>
+    <div class="manifesto-stat">
+      <span class="manifesto-stat-num">∞</span>
+      <span class="manifesto-stat-label">Projects in progress</span>
+    </div>
+    <div class="manifesto-rule"></div>
+    <div class="manifesto-stat">
+      <span class="manifesto-stat-num">1</span>
+      <span class="manifesto-stat-label">Frontier, shared</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <span class="section-eyebrow">What's inside</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>A full toolkit for<br/>serious creative work.</h2>
+    <br/>
+    <div class="features-grid">
+      <div class="feature-item">
+        <p class="feature-num">01.</p>
+        <p class="feature-title">Project Pages</p>
+        <p class="feature-desc">Every project gets a home — a living page you can build, update, and share. Not a portfolio. A workspace.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">02.</p>
+        <p class="feature-title">Creator Profiles</p>
+        <p class="feature-desc">One unified presence linking your work across every platform. YouTube, Substack, GitHub — all in one place.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">03.</p>
+        <p class="feature-title">Clubs</p>
+        <p class="feature-desc">Gather around a shared interest. Study groups, genre communities, creative crews — organized around the work.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">04.</p>
+        <p class="feature-title">Branching Story Editor</p>
+        <p class="feature-desc">Co-write, branch off each other's work, fork narratives. The collaborative tools actually built for writers.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">05.</p>
+        <p class="feature-title">Programs & Resources</p>
+        <p class="feature-desc">Structured creative development. Not just a feed — a place to learn, grow, and level up your craft.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">06.</p>
+        <p class="feature-title">GitHub Integration</p>
+        <p class="feature-desc">Every project optionally backed by a real repository. Version-controlled creative work, from day one.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how">
+    <div class="how-inner">
+      <div class="section-header">
+        <span class="section-eyebrow">How it works</span>
+        <div class="section-rule" style="background: rgba(245,238,216,0.12);"></div>
+      </div>
+      <h2>From idea to<br/>collaboration.</h2>
+      <div class="how-steps">
+        <div class="how-step">
+          <p class="step-num">1</p>
+          <p class="step-title">Create your profile</p>
+          <p class="step-desc">Link your existing work. Tell the Library what you make, what you're building, and who you're looking for.</p>
+        </div>
+        <div class="how-step">
+          <p class="step-num">2</p>
+          <p class="step-title">Open a project</p>
+          <p class="step-desc">Every piece of work gets a page. Set it to private, invite-only, or open for collaboration.</p>
+        </div>
+        <div class="how-step">
+          <p class="step-num">3</p>
+          <p class="step-title">Find your people</p>
+          <p class="step-desc">Browse clubs, join projects, or get matched with collaborators who make what you make.</p>
+        </div>
+        <div class="how-step">
+          <p class="step-num">4</p>
+          <p class="step-title">Build something</p>
+          <p class="step-desc">Use the tools. Co-write, branch, fork, publish. The construction is the story.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOWCASE -->
+  <section class="showcase" id="projects">
+    <div class="section-header">
+      <span class="section-eyebrow">In the Library</span>
+      <div class="section-rule"></div>
+    </div>
+    <h2>Projects already<br/>on the frontier.</h2>
+    <div class="showcase-grid">
+      <div class="showcase-card featured">
+        <span class="sc-tag">Creative Nonfiction · In Progress</span>
+        <p class="sc-title">American Wolves</p>
+        <p class="sc-by">Griffin Cool</p>
+        <p class="sc-desc">An experimental narrative using American wolf history and dispersal behavior as metaphor for growing up — and growing apart. Four friends, rendered as wolves.</p>
+      </div>
+      <div class="showcase-card">
+        <span class="sc-tag">Minecraft Event</span>
+        <p class="sc-title">Gods & Glory</p>
+        <p class="sc-by">Griffin Cool</p>
+        <p class="sc-desc">An eight-day civilization event built around four mythological gods competing for dominance.</p>
+      </div>
+      <div class="showcase-card">
+        <span class="sc-tag">Interactive Fiction</span>
+        <p class="sc-title">Dreamworld</p>
+        <p class="sc-by">Griffin Cool</p>
+        <p class="sc-desc">A dark cosmic dreamscape — part personal archive, part interactive creative universe.</p>
+      </div>
+      <div class="showcase-card">
+        <span class="sc-tag">Episodic Series</span>
+        <p class="sc-title">Lumbridge Logs</p>
+        <p class="sc-by">Griffin Cool</p>
+        <p class="sc-desc">An older player returns to RuneScape and finds his younger self waiting. Episodes triggered by real gameplay.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EARLY ACCESS -->
+  <section class="early-access" id="access">
+    <h2>The Library opens soon.</h2>
+    <p>We're building in the open, for creators who've been waiting for this room. Get early access.</p>
+    <div class="email-form">
+      <input type="email" class="email-input" placeholder="your@email.com" />
+      <a href="#" class="btn-primary">Join the list</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">Earthland Library</span>
+    <ul class="footer-links">
+      <li><a href="#">About</a></li>
+      <li><a href="#">GitHub</a></li>
+      <li><a href="#">Substack</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <span class="footer-copy">A place for makers. Est. 2025.</span>
+  </footer>
+
+</body>
+</html>
